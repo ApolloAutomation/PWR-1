@@ -25,7 +25,7 @@
         runs-on: ubuntu-latest
         strategy:
           matrix:
-            platform: [esp32c3]
+            platform: [esp32]
             appliance:
               - name: PWR-1
                 shorthand: pwr_1
