@@ -27,8 +27,8 @@
           matrix:
             platform: [esp32c3]
             appliance:
-              - name: PWR_1
-                shorthand: pwr_1
+              - name: PWR-1
+                shorthand: pwr-1
           fail-fast: true
         steps:
           - uses: actions/checkout@v4
