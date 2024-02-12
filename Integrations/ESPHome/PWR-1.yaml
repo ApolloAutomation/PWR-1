@@ -1,0 +1,125 @@
+#Define Project
+substitutions:
+  name: apollo-pwr-1
+  version:  "24.2.9.1"
+  device_description: ${name} made by Apollo Automation - version ${version}.
+  
+esphome:
+  name: "${name}"
+  friendly_name: Apollo PWR-1
+  comment: Apollo PWR-1
+  name_add_mac_suffix: true
+  platformio_options:
+    board_build.flash_mode: dio
+
+  on_boot:
+  - priority: 900.0
+    then:
+      - lambda: |-
+          id(cpu_speed) = ESP.getCpuFreqMHz();
+
+  project:
+    name: "ApolloAutomation.PWR-1"
+    version: "${version}"
+
+  min_version: 2023.8.1
+
+# Define Board
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+  
+dashboard_import:
+  package_import_url: github://ApolloAutomation/PWR-1/Integrations/ESPHome/PWR-1.yaml
+  import_full_config: false
+
+
+globals:
+  - id: cpu_speed
+    type: int
+    restore_value: no
+    initial_value: "0"
+  - id: cycleCounter
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+# Enable Home Assistant API
+# Also Add Buzzer Service Connection
+api:
+
+logger:
+
+ota:
+  safe_mode: false
+
+wifi:
+
+  power_save_mode: none
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Apollo PWR1 Hotspot"
+
+captive_portal:
+
+improv_serial:
+
+web_server:
+  port: 80
+
+
+
+# Set Up Key Ports For Communication
+i2c:
+  sda: GPIO1
+  scl: GPIO0
+  id: bus_a
+
+number:
+  - platform: template
+    name: Grid Voltage
+    id: grid_voltage
+    restore_value: true
+    initial_value: 120.0
+    min_value: 0.0
+    max_value: 400.0
+    entity_category: "CONFIG"
+    unit_of_measurement: "V"
+    optimistic: true
+    update_interval: never
+    step: 1
+    mode: box
+
+sensor:
+
+  - platform: ct_clamp
+    sensor: adc_sensor
+    name: "PWR-1 Amp"
+    update_interval: 1s
+    id: pwr1_power
+    unit_of_measurement: A
+    filters:
+      - calibrate_linear:
+        - 0 -> 0
+        - 0.244 -> 0.094
+
+  - platform: template
+    name: "PWR-1 Power"
+    id: pwr1_power_w
+    update_interval: 1s
+    lambda: |-
+      return id(pwr1_power).state * id(grid_voltage).state;
+    unit_of_measurement: W
+    accuracy_decimals: 0
+    icon: "mdi:flash"
+
+  - platform: adc
+    pin: GPIO0
+    name: "ADC"
+    update_interval: 1s
+    id: adc_sensor
+    internal: true
+
+
