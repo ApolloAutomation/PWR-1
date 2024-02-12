@@ -71,12 +71,6 @@ web_server:
 
 
 
-# Set Up Key Ports For Communication
-i2c:
-  sda: GPIO1
-  scl: GPIO0
-  id: bus_a
-
 number:
   - platform: template
     name: Grid Voltage
