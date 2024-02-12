@@ -1,0 +1,13 @@
+name: Build ESPHome
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    uses: esphome/workflows/.github/workflows/publish.yml@main
+    with:
+      files: esp32.yml
+      name: Apollo Automation
