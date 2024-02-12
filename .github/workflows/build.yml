@@ -1,0 +1,75 @@
+---
+    name: Build Firmware
+    
+    on:
+      workflow_call:
+        inputs:
+          upload-artifacts:
+            type: boolean
+            required: false
+            default: false
+            description: "Set to true to have this workflow upload resulting firmware artifacts."
+          force-verbose-logging:
+            type: boolean
+            required: false
+            default: false
+            description: "Set to true to have this workflow force verbose logging, useful for catching build failures in logging code."
+    
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    
+    jobs:
+      build:
+        name: Build ${{ matrix.appliance.shorthand }}-${{ matrix.platform }} Firmware
+        runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            platform: [esp32c3]
+            appliance:
+              - name: PWR-1
+                shorthand: pwr_1
+          fail-fast: true
+        steps:
+          - uses: actions/checkout@v4
+          - name: Force Manifest to Build Local Code
+            uses: mikefarah/yq@v4
+            with:
+              cmd: >
+                Integrations/ESPHome/PWR-1.yaml
+          - name: Force Verbose Logging
+            if: ${{ inputs.force-verbose-logging }}
+            uses: mikefarah/yq@v4
+            with:
+              cmd: >
+                yq -P -i
+                '
+                  .substitutions.logger_level = "VERY_VERBOSE"
+                '
+                Integrations/ESPHome/PWR-1.yaml
+          - name: Build Firmware
+            id: esphome-build
+            uses: esphome/build-action@v1.8.0
+            with:
+              yaml_file: Integrations/ESPHome/PWR-1.yaml
+          - name: Copy firmware and manifest
+            if: ${{ inputs.upload-artifacts }}
+            run: |
+              mkdir output
+              mv ${{ steps.esphome-build.outputs.name }} output/
+          - name: Upload artifact
+            if: ${{ inputs.upload-artifacts }}
+            uses: actions/upload-artifact@v4
+            with:
+              name: apollo-${{ matrix.appliance.shorthand }}-${{ matrix.platform }}
+              path: output
+              retention-days: 7
+      build-status: # Needed to provide an overall status on this job rather than just the various matrix jobs
+        name: Compile Build Status
+        needs: build
+        runs-on: ubuntu-latest
+        if: ${{ always() }}
+        steps:
+          - name: Check build matrix status
+            if: ${{ needs.build.result != 'success' }}
+            run: exit 1
