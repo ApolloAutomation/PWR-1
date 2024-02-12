@@ -27,7 +27,7 @@
           matrix:
             platform: [esp32c3]
             appliance:
-              - name: PWR-1
+              - name: PWR_1
                 shorthand: pwr_1
           fail-fast: true
         steps:

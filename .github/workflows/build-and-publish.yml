@@ -29,7 +29,7 @@
         strategy:
           matrix:
             appliance:
-              - name: PWR-1
+              - name: PWR_1
                 shorthand: pwr_1
           fail-fast: false
         steps:
