@@ -36,6 +36,7 @@
             uses: mikefarah/yq@v4
             with:
               cmd: >
+                yq -P
                 Integrations/ESPHome/PWR-1.yaml
           - name: Force Verbose Logging
             if: ${{ inputs.force-verbose-logging }}
