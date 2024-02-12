@@ -9,5 +9,5 @@ jobs:
   build:
     uses: esphome/workflows/.github/workflows/publish.yml@main
     with:
-      files: esp32.yml
-      name: Apollo Automation
+      files: Integrations/ESPHome/PWR-1.yaml
+      name: Apollo PWR-1
